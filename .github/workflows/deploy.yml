@@ -21,11 +21,15 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+          sudo apt-get install -y \
+          libcurl4-openssl-dev \
+          libssl-dev \
+          libxml2-dev \
+          libarchive-dev
 
       - name: Install R packages
         run: |
-          Rscript -e 'install.packages("shinylive", repos = "https://cloud.r-project.org")'
+          Rscript -e 'install.packages("shinylive", repos = "https://packagemanager.posit.co/cran/latest")'
       
       - name: Export Shiny app with shinylive
         run: |
