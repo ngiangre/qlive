@@ -1,0 +1,17 @@
+Package: qlive
+Title: Compare statistic implementations
+Version: 0.0.0.9000
+Authors@R: 
+    person(c("Nick", "Giangreco",,"nick.giangreco@gmail.com"), "Giangreco")
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Imports: 
+    bslib,
+    dplyr,
+    purrr,
+    shiny,
+    shinylive,
+    stats
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
