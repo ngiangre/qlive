@@ -25,8 +25,8 @@ jobs:
 
       - name: Install system dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
-          with:
-            cache: true
+        with:
+          cache: true
 
       - name: Export Shiny app with shinylive
         run: |
