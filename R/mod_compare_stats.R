@@ -3,7 +3,9 @@ mod_compare_stats_ui <- function(id) {
 
   bslib::card(
     bslib::card_header("Statistical comparison"),
-    shiny::tableOutput(ns("results"))
+    shiny::plotOutput(ns("results"),
+      width = "100%"
+    )
   )
 }
 
@@ -22,58 +24,100 @@ mod_compare_stats_server <- function(id, data) {
         )
       }
 
-      output$results <- shiny::renderTable({
+      output$results <- shiny::renderPlot({
         df <- data()
         shiny::req(df)
         
-        df |> 
+        summarised_df <- 
+          df |> 
           dplyr::reframe(
             {
               g1 <- y[group == levels(group)[1]]
               g2 <- y[group == levels(group)[2]]
 
               # Classical tests
-              ttest <- stats::t.test(g1, g2, var.equal = FALSE)
-              wilcox <- stats::wilcox.test(g1, g2, exact = FALSE)
+              ttest <- stats::t.test(g1, g2, var.equal = TRUE)
+              wilcox <- stats::wilcox.test(g1, g2)
 
               # Linear model equivalents
-              lm_param <- stats::lm(y ~ group, data = df)
-              lm_rank  <- stats::lm(base::rank(y) ~ group, data = df)
+              lm_param <- stats::lm(y ~ 1 + group)
+              lm_rank  <- stats::lm(signed_rank(y) ~ 1 + group)
 
-              lm_param_stats <- extract_lm_stats(lm_param, "groupGroup 2")
-              lm_rank_stats  <- extract_lm_stats(lm_rank,  "groupGroup 2")
-
-              rbind(
-                data.frame(
-                  method = "Welch's (t.test)",
-                  estimate = unname(diff(ttest$estimate)),
-                  statistic = unname(ttest$statistic),
-                  p_value = ttest$p.value
+              lm_param_stats <- extract_lm_stats(lm_param, "group1")
+              lm_rank_stats  <- extract_lm_stats(lm_rank,  "group1")
+              cbind(
+                rbind(
+                  data.frame(
+                    comparison = "t.test vs. lm",
+                    statistic = c(
+                      'estimate',
+                      'pvalue'
+                    ),
+                    builtin_value = c(
+                      unname(diff(ttest$estimate)),
+                      ttest$p.value
+                    )
+                  ),
+                  data.frame(
+                    comparison = "wilcox.test vs. lm",
+                    statistic = c(
+                      'estimate',
+                      'pvalue'
+                    ),
+                    builtin_value = c(
+                      NA_real_,
+                      wilcox$p.value
+                    )
+                  )
                 ),
-                data.frame(
-                  method = "Mann–Whitney (wilcox.test)",
-                  estimate = NA_real_,
-                  statistic = unname(wilcox$statistic),
-                  p_value = wilcox$p.value
-                ),
-                data.frame(
-                  method = "LM: y ~ group",
-                  estimate = lm_param_stats$estimate,
-                  statistic = lm_param_stats$statistic,
-                  p_value = lm_param_stats$p_value
-                ),
-                data.frame(
-                  method = "LM: rank(y) ~ group",
-                  estimate = lm_rank_stats$estimate,
-                  statistic = lm_rank_stats$statistic,
-                  p_value = lm_rank_stats$p_value
+                rbind(
+                  data.frame(
+                    comparison = "t.test vs. lm",
+                    statistic = c(
+                      'estimate',
+                      'pvalue'
+                    ),
+                    lm_value = c(
+                      lm_param_stats$estimate,
+                      lm_param_stats$p_value
+                    )
+                  ),
+                  data.frame(
+                    comparison = "wilcox.test vs. lm",
+                    statistic = c(
+                      'estimate',
+                      'pvalue'
+                    ),
+                    lm_value = c(
+                      lm_rank_stats$estimate,
+                      lm_rank_stats$p_value
+                    )
+                  )    
                 )
               )
             },
             .by = n
-          )
+          ) |> 
+          dplyr::tibble()
         
-      }, digits = 6)
+        summarised_df |> 
+          ggplot2::ggplot(
+            ggplot2::aes(builtin_value,lm_value,fill=n)
+          ) + 
+          ggplot2::geom_abline(
+            intercept = 0, slope = 1,
+            linetype = "dashed",color = "red",
+            linewidth = 2
+          ) +
+          ggplot2::geom_point(pch=21,size=5) + 
+          ggplot2::facet_grid(
+            statistic~comparison,
+            scales="free"
+          ) +
+          ggplot2::scale_fill_viridis_c() +
+          ggplot2::theme_bw()
+        
+      })
     }
   )
 }

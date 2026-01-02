@@ -58,7 +58,7 @@ mod_data_gen_server <- function(id) {
                 n = .x,
                 y = c(y1, y2),
                 group = factor(
-                  c(rep("Group 1", length(y1)), rep("Group 2", length(y2)))
+                  c(rep(0, length(y1)), rep(1, length(y2)))
                 )
               )
               df
