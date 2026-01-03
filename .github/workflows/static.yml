@@ -24,6 +24,12 @@ jobs:
           r-version: '4.4'
       
       - uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Install additional system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-dev
+
       
       - uses: r-lib/actions/setup-renv@v2
         with:
