@@ -28,7 +28,9 @@ jobs:
       - name: Install additional system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libarchive-dev
+          sudo apt-get install -y \
+          libarchive-dev \
+          libcurl4-openssl-dev
 
       
       - uses: r-lib/actions/setup-renv@v2
