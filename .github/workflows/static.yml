@@ -23,15 +23,7 @@ jobs:
           r-version: renv
           cran: https://packagemanager.posit.co/cran/2025-04-01
 
-      - uses: r-lib/actions/setup-renv@v2
-
-      - name: Install renv package
-        run: install.packages('renv')
-        shell: Rscript {0}
-
-      - name: Restore project library with renv::restore()
-        run: renv::restore(prompt = FALSE)
-        shell: Rscript {0}
+      - uses: r-lib/actions/setup-r-dependencies@v2
 
       - name: Export Shiny app with shinylive
         run: |
