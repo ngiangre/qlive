@@ -22,6 +22,9 @@ jobs:
         with:
           r-version: '4.4'
 
+      - name: Set CRAN mirror
+        run: echo 'options(repos = c(CRAN = "https://packagemanager.posit.co/cran/2025-04-01"))' >> ~/.Rprofile
+
       - uses: r-lib/actions/setup-renv@v2
         with:
           bypass-cache: true
@@ -31,7 +34,7 @@ jobs:
         shell: bash
 
       - name: Install renv package
-        run: Rscript -e "install.packages('renv',repos = 'https://packagemanager.posit.co/cran/2025-04-01')"
+        run: Rscript -e "install.packages('renv')"
         shell: bash
 
       - name: Restore project library with renv::restore()
