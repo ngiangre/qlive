@@ -25,6 +25,9 @@ jobs:
       - name: Set CRAN mirror
         run: echo 'options(repos = c(CRAN = "https://packagemanager.posit.co/cran/2025-04-01"))' >> ~/.Rprofile
 
+      - name: Check libcurl
+        run: Rscript -e 'capabilities("libcurl")
+
       - uses: r-lib/actions/setup-renv@v2
         with:
           bypass-cache: true
