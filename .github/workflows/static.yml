@@ -38,8 +38,6 @@ jobs:
 
       
       - uses: r-lib/actions/setup-renv@v2
-        with:
-          bypass-cache: true
 
       - name: Show R configuration
         run: |
