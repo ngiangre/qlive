@@ -22,6 +22,10 @@ jobs:
         with:
           r-version: '4.4.3'
 
+      - name: Check generic download works
+        run: Rscript -e 'download.file("https://www.google.com", tempfile())'
+        shell: bash
+
       - name: Install renv package
         run: Rscript -e "install.packages('renv',repos = 'https://packagemanager.posit.co/cran/2025-04-01')"
         shell: bash
