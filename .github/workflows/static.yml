@@ -22,16 +22,12 @@ jobs:
         with:
           r-version: '4.4.3'
 
-      - name: Set up renv
-        uses: r-lib/actions/setup-renv@v2
-        with:
-          profile: '"shinylive"'
-          bypass-cache: true
+      - name: Install renv package
+        run: Rscript -e "install.packages('renv',repos = 'https://packagemanager.posit.co/cran/2025-04-01')"
+        shell: bash
 
-      - name: Install system dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          cache: true
+      - name: Restore project library with renv::restore()
+        run: Rscript -e "renv::restore(prompt = FALSE)"
 
       - name: Export Shiny app with shinylive
         run: |
