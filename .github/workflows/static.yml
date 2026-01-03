@@ -24,6 +24,9 @@ jobs:
 
       - name: Set up renv
         uses: r-lib/actions/setup-renv@v2
+        with:
+          profile: '"shinylive"'
+          bypass-cache: true
 
       - name: Install system dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
