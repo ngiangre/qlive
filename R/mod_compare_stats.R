@@ -1,11 +1,8 @@
 mod_compare_stats_ui <- function(id) {
   ns <- shiny::NS(id)
 
-  bslib::card(
-    bslib::card_header("Statistical comparison"),
-    shiny::plotOutput(ns("results"),
-      width = "100%"
-    )
+  shiny::tagList(
+    ggiraph::girafeOutput(ns("results"))
   )
 }
 
@@ -24,7 +21,7 @@ mod_compare_stats_server <- function(id, data) {
         )
       }
 
-      output$results <- shiny::renderPlot({
+      output$results <- ggiraph::renderGirafe({
         df <- data()
         shiny::req(df)
         
@@ -48,7 +45,7 @@ mod_compare_stats_server <- function(id, data) {
               cbind(
                 rbind(
                   data.frame(
-                    comparison = "t.test vs. lm",
+                    comparison = "t.test(g1, g2, var.equal = TRUE) vs. lm(y ~ 1 + group)",
                     statistic = c(
                       'estimate',
                       'pvalue'
@@ -59,7 +56,7 @@ mod_compare_stats_server <- function(id, data) {
                     )
                   ),
                   data.frame(
-                    comparison = "wilcox.test vs. lm",
+                    comparison = "wilcox.test(g1, g2) vs. lm(signed_rank(y) ~ 1 + group)",
                     statistic = c(
                       'estimate',
                       'pvalue'
@@ -72,7 +69,7 @@ mod_compare_stats_server <- function(id, data) {
                 ),
                 rbind(
                   data.frame(
-                    comparison = "t.test vs. lm",
+                    comparison = "t.test(g1, g2, var.equal = TRUE) vs. lm(y ~ 1 + group)",
                     statistic = c(
                       'estimate',
                       'pvalue'
@@ -83,7 +80,7 @@ mod_compare_stats_server <- function(id, data) {
                     )
                   ),
                   data.frame(
-                    comparison = "wilcox.test vs. lm",
+                    comparison = "wilcox.test(g1, g2) vs. lm(signed_rank(y) ~ 1 + group)",
                     statistic = c(
                       'estimate',
                       'pvalue'
@@ -98,24 +95,55 @@ mod_compare_stats_server <- function(id, data) {
             },
             .by = n
           ) |> 
-          dplyr::tibble()
+          dplyr::tibble() |> 
+          dplyr::mutate(
+            id = 1:dplyr::n(),
+            tooltip = glue::glue("
+              Comparison: {comparison}
+              Statistic: {statistic}
+              Sample Size: {n}
+              Builtin Value: {builtin_value}
+              LM Value: {lm_value}
+            ")
+          )
         
-        summarised_df |> 
+        g <- summarised_df |> 
           ggplot2::ggplot(
-            ggplot2::aes(builtin_value,lm_value,fill=n)
+            ggplot2::aes(
+              builtin_value,
+              lm_value,
+              color = n,
+              id = id,
+              tooltip = tooltip)
           ) + 
           ggplot2::geom_abline(
             intercept = 0, slope = 1,
-            linetype = "dashed",color = "red",
-            linewidth = 2
+            linetype = "dashed",color = "black"
           ) +
-          ggplot2::geom_point(pch=21,size=5) + 
-          ggplot2::facet_grid(
-            statistic~comparison,
+          ggiraph::geom_point_interactive(
+            size = 7
+          ) + 
+          ggplot2::facet_wrap(
+            ~comparison + statistic,
             scales="free"
           ) +
-          ggplot2::scale_fill_viridis_c() +
-          ggplot2::theme_bw()
+          ggplot2::scale_color_viridis_c(
+            name = "Sample Size"
+          ) +
+          ggplot2::theme_bw(
+            base_size = 24
+          ) +
+          ggplot2::theme(
+            text = ggplot2::element_text(
+              face = "bold"
+            )
+          )
+        
+        ggiraph::girafe(
+          ggobj = g,
+          width_svg = 20L,
+          height_svg = 12L
+        )
         
       })
     }

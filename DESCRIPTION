@@ -8,6 +8,8 @@ License: MIT + file LICENSE
 Imports: 
     bslib,
     dplyr,
+    ggiraph,
+    glue,
     purrr,
     shiny,
     shinylive,
